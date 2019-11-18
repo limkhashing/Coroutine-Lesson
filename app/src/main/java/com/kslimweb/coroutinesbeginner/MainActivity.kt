@@ -46,6 +46,10 @@ class MainActivity : AppCompatActivity() {
     private suspend fun fakeApiRequestTimeout() {
         withContext(IO) {
 
+            val exceptionHandler = CoroutineExceptionHandler{_ , throwable->
+                throwable.printStackTrace()
+            }
+
             val job = withTimeoutOrNull(1900L) {
                 val result1 = getResult1FromApi() // wait until job is done
                 setTextOnMainThread("Got $result1")
