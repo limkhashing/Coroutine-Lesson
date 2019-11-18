@@ -3,12 +3,9 @@ package com.kslimweb.coroutinesbeginner
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,6 +25,7 @@ class MainActivity : AppCompatActivity() {
             // IO, Main, Default
             CoroutineScope(IO).launch {
                 fakeApiRequest()
+//                fakeApiRequestTimeout()
             }
         }
     }
@@ -42,6 +40,26 @@ class MainActivity : AppCompatActivity() {
         // Coroutines is thread independent
         withContext (Main) {
             setNewText(input)
+        }
+    }
+
+    private suspend fun fakeApiRequestTimeout() {
+        withContext(IO) {
+
+            val job = withTimeoutOrNull(1900L) {
+                val result1 = getResult1FromApi() // wait until job is done
+                setTextOnMainThread("Got $result1")
+
+                val result2 = getResult2FromApi() // wait until job is done
+                setTextOnMainThread("Got $result2")
+
+            } // waiting for job to complete...
+
+            if (job == null) {
+                val cancelMessage = "Cancelling job...Job took longer than 1900 ms"
+                println("debug: $cancelMessage")
+                setTextOnMainThread(cancelMessage)
+            }
         }
     }
 
